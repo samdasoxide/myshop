@@ -1,5 +1,6 @@
 import csv
 import datetime
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.contrib import admin
 from .models import Order, OrderItem
@@ -34,6 +35,16 @@ def export_to_csv(modeladmin, request, queryset):
 export_to_csv.short_description = 'Export to csv'
 
 
+def order_detail(obj):
+    return '<a href="{}">View</a>'.format(
+        reverse('orders:admin_order_detail', args=[obj.id]))
+
+
+# This avoids autoescaping
+# Django escapes html output by default
+order_detail.allow_tags = True
+
+
 class OrderItemInline(admin.TabularInline):
     '''
         Tabular Inline View for OrderItem
@@ -47,7 +58,7 @@ class OrderAdmin(admin.ModelAdmin):
         Admin View for Order
     '''
     list_display = ('id', 'first_name', 'last_name', 'email', 'address',
-                    'postal_code', 'city', 'paid')
+                    'postal_code', 'city', 'paid', order_detail)
     list_filter = ('paid', 'created', 'updated')
     inlines = [OrderItemInline]
     actions = [export_to_csv]
